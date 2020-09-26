@@ -5,6 +5,7 @@ import * as cdk from '@aws-cdk/core';
 import * as s3 from '@aws-cdk/aws-s3';
 import * as s3deploy from '@aws-cdk/aws-s3-deployment';
 import { DockerImageAsset } from '@aws-cdk/aws-ecr-assets';
+import { Stack } from '@aws-cdk/core';
 
 export class OpaWorkflowCdkStack extends cdk.Stack {
   constructor(scope: cdk.App, id: string, props?: cdk.StackProps) {
@@ -74,8 +75,8 @@ export class OpaWorkflowCdkStack extends cdk.Stack {
       memoryLimitMiB: 64,
       logging: loggingConfig,
       environment: {
-        AWS_REGION: "us-west-1",
-        POLICY_BUCKET: "https://" + policyBucket.bucketRegionalDomainName,
+        AWS_REGION: Stack.of(this).region,
+        POLICY_BUCKET: policyBucket.bucketRegionalDomainName,
         POLICY_BUNDLE: "policies/bundle.tar.gz",
       },
     });

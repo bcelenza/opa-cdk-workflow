@@ -5,7 +5,7 @@ plugins:
 
 services:
   s3:
-    url: ${POLICY_BUCKET}
+    url: https://${POLICY_BUCKET}
     credentials:
       s3_signing:
         metadata_credentials:
