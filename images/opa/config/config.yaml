@@ -1,0 +1,20 @@
+plugins:
+  envoy.ext_authz.grpc:
+    addr: :9191
+    query: data.http.frontend.authz.allow
+
+services:
+  s3:
+    url: ${POLICY_BUCKET}
+    credentials:
+      s3_signing:
+        metadata_credentials:
+          aws_region: ${AWS_REGION}
+
+bundles:
+  authz:
+    service: s3
+    resource: ${POLICY_BUNDLE}
+    polling:
+      min_delay_seconds: 10
+      max_delay_seconds: 20
