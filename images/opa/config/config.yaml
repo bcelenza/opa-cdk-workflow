@@ -1,8 +1,10 @@
 plugins:
+  # Enable the gRPC auth service for envoy
   envoy.ext_authz.grpc:
     addr: :9191
     query: data.http.frontend.authz.allow
 
+# Pull policy configuration from S3
 services:
   s3:
     url: https://${POLICY_BUCKET}
@@ -11,6 +13,7 @@ services:
         metadata_credentials:
           aws_region: ${AWS_REGION}
 
+# Use the policy bundle from S3 and poll for new config every 10-20 seconds, jittered
 bundles:
   authz:
     service: s3

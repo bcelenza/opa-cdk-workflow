@@ -7,12 +7,14 @@ import * as s3deploy from '@aws-cdk/aws-s3-deployment';
 import { DockerImageAsset } from '@aws-cdk/aws-ecr-assets';
 import { Stack } from '@aws-cdk/core';
 
-export class OpaWorkflowCdkStack extends cdk.Stack {
+export class AppStack extends cdk.Stack {
   constructor(scope: cdk.App, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
+    const vpcCidr = "10.0.0.0/16";
+
     // VPC
     const vpc = new ec2.Vpc(this, 'VPC', {
-      cidr: "10.0.0.0/16",
+      cidr: vpcCidr,
     });
 
     // ECS cluster
@@ -31,13 +33,12 @@ export class OpaWorkflowCdkStack extends cdk.Stack {
     });
 
     // OPA and Envoy images
-    const opaImage = new DockerImageAsset(this, 'OPAImage', {
+    const opaImage = new DockerImageAsset(this, 'OpaImage', {
       directory: './images/opa',
     });
     const envoyImage = new DockerImageAsset(this, 'EnvoyImage', {
       directory: './images/envoy',
     });
-
 
     // Load balancer
     const lb = new elb.ApplicationLoadBalancer(this, 'LoadBalancer', {
@@ -47,15 +48,19 @@ export class OpaWorkflowCdkStack extends cdk.Stack {
     const lbListener = lb.addListener('LoadBalancerListener', {
       port: 80
     });
+    new cdk.CfnOutput(this, 'LoadBalancerDnsName', {
+      value: lb.loadBalancerDnsName
+    });
 
-    // Frontend service task definition
+    // API service task definition
     const loggingConfig = ecs.LogDrivers.awsLogs({streamPrefix: 'OpaWorkflow'});
-    const frontendTaskDef = new ecs.FargateTaskDefinition(this, 'FrontendServiceTaskDefinition')
+    const frontendTaskDef = new ecs.FargateTaskDefinition(this, 'ApiServiceTaskDefinition')
     const envoyContainer = frontendTaskDef.addContainer('envoy', {
       image: ecs.ContainerImage.fromDockerImageAsset(envoyImage),
       memoryLimitMiB: 128,
       logging: loggingConfig,
     });
+    // Expose HTTP port for load balancer
     envoyContainer.addPortMappings({
       containerPort: 80,
     });
@@ -67,6 +72,7 @@ export class OpaWorkflowCdkStack extends cdk.Stack {
       },
       logging: loggingConfig,
     });
+    // Expose HTTP service for envoy
     appContainer.addPortMappings({
       containerPort: 8080,
     });
@@ -80,23 +86,31 @@ export class OpaWorkflowCdkStack extends cdk.Stack {
         POLICY_BUNDLE: "policies/bundle.tar.gz",
       },
     });
+    // Expose gRPC authZ service for envoy
     opaContainer.addPortMappings({
       containerPort: 9191,
     });
 
-    // Frontend service
-    const frontendService = new ecs.FargateService(this, 'FrontendService', {
+    // Security group for API service
+    const apiServiceSecurityGroup = new ec2.SecurityGroup(this, 'ApiServiceSecurityGroup', {
+      vpc: vpc,
+    });
+    apiServiceSecurityGroup.addIngressRule(ec2.Peer.ipv4(vpcCidr), ec2.Port.tcp(80), 'HTTP from within VPC');
+
+    // API service
+    const apiService = new ecs.FargateService(this, 'ApiService', {
       cluster: cluster,
       taskDefinition: frontendTaskDef,
+      securityGroups: [apiServiceSecurityGroup],
     });
 
     // Grant frontend service access to the policy bucket
-    policyBucket.grantRead(frontendService.taskDefinition.taskRole);
+    policyBucket.grantRead(apiService.taskDefinition.taskRole);
 
     // Add frontend service tasks to load balancer
-    lbListener.addTargets('FrontendTasks', {
+    lbListener.addTargets('ApiServiceTasks', {
       port: 80,
-      targets: [frontendService],
+      targets: [apiService],
     })
   }
 }
