@@ -45,4 +45,4 @@ make deploy
 
 This will deploy the updated policy bundle, which the API service's OPA container will pick up within 20 seconds and begin enforcing. It will not redeploy the service.
 
-Note: CDK will prompt with what appears to be an IAM policy modification for the task role associated with the API service. There is no actual change, other than the parameter name used in the CFN template. This is a known issue in CDK that is being address with [this work](https://github.com/aws/aws-cdk/issues/3463).
+Note: CDK will prompt with what appears to be an IAM policy modification for the task role associated with the API service. There is no actual change, other than the parameter name used in the CFN template. This is a known issue in CDK that is being addressed with [this work](https://github.com/aws/aws-cdk/issues/3463).
