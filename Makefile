@@ -16,3 +16,6 @@ bundle:
 
 deploy: test bundle
 	cdk deploy
+
+destroy: clean
+	cdk destroy
