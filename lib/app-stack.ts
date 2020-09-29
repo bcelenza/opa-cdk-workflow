@@ -54,8 +54,8 @@ export class AppStack extends cdk.Stack {
 
     // API service task definition
     const loggingConfig = ecs.LogDrivers.awsLogs({streamPrefix: 'OpaWorkflow'});
-    const frontendTaskDef = new ecs.FargateTaskDefinition(this, 'ApiServiceTaskDefinition')
-    const envoyContainer = frontendTaskDef.addContainer('envoy', {
+    const apiServiceTaskDef = new ecs.FargateTaskDefinition(this, 'ApiServiceTaskDefinition')
+    const envoyContainer = apiServiceTaskDef.addContainer('envoy', {
       image: ecs.ContainerImage.fromDockerImageAsset(envoyImage),
       memoryLimitMiB: 128,
       logging: loggingConfig,
@@ -64,7 +64,7 @@ export class AppStack extends cdk.Stack {
     envoyContainer.addPortMappings({
       containerPort: 80,
     });
-    const appContainer = frontendTaskDef.addContainer('app', {
+    const appContainer = apiServiceTaskDef.addContainer('app', {
       image: ecs.ContainerImage.fromRegistry('bcelenza/mockingbird'),
       memoryLimitMiB: 64,
       environment: {
@@ -76,7 +76,7 @@ export class AppStack extends cdk.Stack {
     appContainer.addPortMappings({
       containerPort: 8080,
     });
-    const opaContainer = frontendTaskDef.addContainer('opa', {
+    const opaContainer = apiServiceTaskDef.addContainer('opa', {
       image: ecs.ContainerImage.fromDockerImageAsset(opaImage),
       memoryLimitMiB: 64,
       logging: loggingConfig,
@@ -100,7 +100,7 @@ export class AppStack extends cdk.Stack {
     // API service
     const apiService = new ecs.FargateService(this, 'ApiService', {
       cluster: cluster,
-      taskDefinition: frontendTaskDef,
+      taskDefinition: apiServiceTaskDef,
       securityGroups: [apiServiceSecurityGroup],
     });
 
