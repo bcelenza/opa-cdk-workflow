@@ -1,6 +1,7 @@
 import * as ecs from '@aws-cdk/aws-ecs';
 import * as ec2 from '@aws-cdk/aws-ec2';
 import * as elb from '@aws-cdk/aws-elasticloadbalancingv2';
+import * as logs from '@aws-cdk/aws-logs';
 import * as cdk from '@aws-cdk/core';
 import * as s3 from '@aws-cdk/aws-s3';
 import * as s3deploy from '@aws-cdk/aws-s3-deployment';
@@ -53,7 +54,8 @@ export class AppStack extends cdk.Stack {
     });
 
     // API service task definition
-    const loggingConfig = ecs.LogDrivers.awsLogs({streamPrefix: 'OpaWorkflow'});
+    const logGroup = new logs.LogGroup(this, 'LogGroup', {logGroupName: 'OPA-Workflow'});
+    const loggingConfig = ecs.LogDrivers.awsLogs({logGroup: logGroup, streamPrefix: 'OPA-Workflow'});
     const apiServiceTaskDef = new ecs.FargateTaskDefinition(this, 'ApiServiceTaskDefinition')
     const envoyContainer = apiServiceTaskDef.addContainer('envoy', {
       image: ecs.ContainerImage.fromDockerImageAsset(envoyImage),
