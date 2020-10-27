@@ -21,6 +21,9 @@ bundle:
 		-v $(POLICY_STAGING_DIR):/output \
 		$(OPA_IMAGE) build -o /output/bundle.tar.gz -b /policies
 
+diff:
+	$(CDK_BIN) diff
+
 deploy: test bundle
 	$(CDK_BIN) deploy --require-approval never
 
