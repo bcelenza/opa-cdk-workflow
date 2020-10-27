@@ -52,7 +52,7 @@ test_post_echo_denied {
     }
 }
 
-test_get_foo_denied {
+test_get_elsewhere_denied {
     not allow with input as {
         "attributes": {
             "request": {
