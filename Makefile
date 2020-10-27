@@ -2,6 +2,7 @@ BASE_DIR=$(shell pwd)
 POLICY_BUNDLE_DIR=$(BASE_DIR)/policy-bundle
 POLICY_STAGING_DIR=$(BASE_DIR)/opa.out
 OPA_IMAGE=openpolicyagent/opa:latest-envoy
+CDK_BIN=$(BASE_DIR)/node_modules/.bin/cdk
 
 .PHONY: clean test bundle deploy
 
@@ -21,7 +22,7 @@ bundle:
 		$(OPA_IMAGE) build -o /output/bundle.tar.gz -b /policies
 
 deploy: test bundle
-	cdk deploy
+	$(CDK_BIN) deploy
 
 destroy: clean
-	cdk destroy
+	$(CDK_BIN) destroy
