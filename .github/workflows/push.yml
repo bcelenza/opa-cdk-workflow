@@ -19,6 +19,9 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
+      - name: Pre-deploy
+        run: |-
+          npm install
       - name: Deploy
         run: make deploy
         env:
