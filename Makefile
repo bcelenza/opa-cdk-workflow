@@ -22,7 +22,7 @@ bundle:
 		$(OPA_IMAGE) build -o /output/bundle.tar.gz -b /policies
 
 deploy: test bundle
-	$(CDK_BIN) deploy
+	$(CDK_BIN) deploy --require-approval never
 
 destroy: clean
 	$(CDK_BIN) destroy
