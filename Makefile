@@ -9,13 +9,13 @@ clean:
 	rm -rf $(POLICY_STAGING_DIR)
 
 test:
-	docker run -it --rm \
+	docker run --rm \
 		-v $(POLICY_BUNDLE_DIR):/policies \
 		$(OPA_IMAGE) test -v /policies
 
 bundle:
 	mkdir -p $(POLICY_STAGING_DIR)
-	docker run -it --rm \
+	docker run --rm \
 		-v $(POLICY_BUNDLE_DIR):/policies \
 		-v $(POLICY_STAGING_DIR):/output \
 		$(OPA_IMAGE) build -o /output/bundle.tar.gz -b /policies
