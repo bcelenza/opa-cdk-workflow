@@ -39,8 +39,8 @@ test_post_home_denied {
     }
 }
 
-test_post_echo_denied {
-    not allow with input as {
+test_post_echo_allowed {
+    allow with input as {
         "attributes": {
             "request": {
                 "http": {
