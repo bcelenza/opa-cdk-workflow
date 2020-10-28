@@ -21,6 +21,7 @@ export class AppStack extends cdk.Stack {
     // ECS cluster
     const cluster = new ecs.Cluster(this, 'Cluster', {
       vpc: vpc,
+      containerInsights: true,
     });
 
     // S3 bucket for policy bundles

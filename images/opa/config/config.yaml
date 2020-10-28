@@ -1,7 +1,7 @@
 plugins:
   # Enable the gRPC auth service for envoy
   envoy.ext_authz.grpc:
-    addr: :9191
+    addr: localhost:9191
     query: data.http.api.authz.allow
 
 # Pull policy configuration from S3
