@@ -10,8 +10,3 @@ allow {
     allowed_paths[http_request.path]
     http_request.method == "GET"
 }
-
-allow {
-    http_request.path == "/echo"
-    http_request.method == "POST"
-}
